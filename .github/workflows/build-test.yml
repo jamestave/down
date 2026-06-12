@@ -1,0 +1,42 @@
+name: Build for Testing
+
+on:
+  push:
+    branches: [ chrome ]
+  pull_request:
+    branches: [ chrome ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Run tests
+      run: yarn test
+
+    - name: Build for testing (dev mode)
+      run: yarn build --mode dev
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dta-build-artifacts
+        path: web-ext-artifacts/
+        retention-days: 30
+
+    - name: List build outputs
+      run: ls -lh web-ext-artifacts/
