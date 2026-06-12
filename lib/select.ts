@@ -209,6 +209,12 @@ export async function select(links: BaseItem[], media: BaseItem[]) {
       const selectedList = (options.type === "links" ? links : media);
       const selectedItems = selectedList.filter(
         (item: BaseItem, idx: number) => selectedIndexes.has(idx));
+      
+      // Select only the first matching media item
+      const finalItems = options.type === "media" && selectedItems.length > 0 
+        ? [selectedItems[0]] 
+        : selectedItems;
+      
       for (const [filter, override] of overrides) {
         const f = fm.get(filter);
         if (f) {
@@ -216,7 +222,7 @@ export async function select(links: BaseItem[], media: BaseItem[]) {
         }
       }
       await fm.save();
-      return {items: selectedItems, options};
+      return {items: finalItems, options};
     }
     finally {
       fm.off("changed", sendFilters);
